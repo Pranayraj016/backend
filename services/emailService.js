@@ -1,33 +1,26 @@
-const nodemailer = require("nodemailer");
+const SibApiV3Sdk = require("@sendinblue/client");
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT), // make sure Number()
-  secure: false, // 587 => false
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-console.log("----- SMTP CONFIG CHECK -----");
-console.log("SMTP_HOST =", process.env.SMTP_HOST);
-console.log("SMTP_PORT =", process.env.SMTP_PORT);
-console.log("SMTP_USER =", process.env.SMTP_USER);
-console.log("SMTP_PASS length =", process.env.SMTP_PASS?.length);
-console.log("------------------------------");
+const brevo = new SibApiV3Sdk.TransactionalEmailsApi();
+brevo.setApiKey(
+  SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY
+);
+
 const sendOTPEmail = async (to, name, otp) => {
   try {
-    const mailOptions = {
-      from: `"Your App Name" <${process.env.SMTP_USER}>`,
-      to,
+    await brevo.sendTransacEmail({
+      sender: { email: "yourgmail@gmail.com", name: "Your App" },
+      to: [{ email: to }],
       subject: "Your OTP Code",
-      html: `<p>Hello ${name},</p><p>Your OTP is <b>${otp}</b></p>`,
-    };
+      htmlContent: `
+        <p>Hello ${name},</p>
+        <p>Your OTP is <b>${otp}</b></p>
+      `,
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log("✅ OTP email sent to:", to);
-  } catch (error) {
-    console.log("❌ Email send error:", error);
+    console.log("✅ Email sent to:", to);
+  } catch (err) {
+    console.log("❌ Email send failed:", err);
     throw new Error("Failed to send email");
   }
 };
