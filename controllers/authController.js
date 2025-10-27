@@ -10,7 +10,12 @@ const { sendOTPEmail } = require("../services/emailService");
 const signup = async (req, res, next) => {
   try {
     const { name, email, password, role, adminKey } = req.body;
-
+    if (email.toLowerCase() !== "pranayraj016@gmail.com") {
+      return res.status(400).json({
+        success: false,
+        message: "Only developer email is allowed for testing in sandbox mode",
+      });
+    }
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
