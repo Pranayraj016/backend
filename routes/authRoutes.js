@@ -39,5 +39,6 @@ router.get("/admin-only", authenticate, authorize("admin"), (req, res) => {
     data: { userId: req.user.userId, role: req.user.role },
   });
 });
+console.log("✅ authRoutes file loaded");
 
 module.exports = router;
